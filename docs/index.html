@@ -433,7 +433,7 @@
       statusBox.textContent = '';
 
       try {
-        const timeout = AbortSignal.timeout(15000);
+        const timeout = AbortSignal.timeout(60000);
         // FormSubmit doesn't return CORS headers for this origin, so the response
         // itself is unreadable from JS even when delivery succeeds server-side.
         // no-cors avoids fetch() rejecting on that unreadable (but successful) response.
