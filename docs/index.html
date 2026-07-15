@@ -432,17 +432,34 @@
       statusBox.className = 'status';
       statusBox.textContent = '';
 
+      const attempts = 3;
+      let lastError = null;
+      let sent = false;
+
+      for (let attempt = 1; attempt <= attempts && !sent; attempt++) {
+        if (attempt > 1) submitBtn.textContent = `Envoi en cours… (tentative ${attempt}/${attempts})`;
+        try {
+          const timeout = AbortSignal.timeout(20000);
+          // FormSubmit doesn't return CORS headers for this origin, so the response
+          // itself is unreadable from JS even when delivery succeeds server-side.
+          // no-cors avoids fetch() rejecting on that unreadable (but successful) response.
+          // A dropped connection while waiting for the (unreadable) response still throws,
+          // even though the email may already be sent — retrying instead of giving up
+          // immediately avoids treating that as a real failure.
+          await fetch('https://formsubmit.co/ajax/laurinechanelpro@gmail.com', {
+            method: 'POST',
+            mode: 'no-cors',
+            body: new FormData(form),
+            signal: timeout
+          });
+          sent = true;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
       try {
-        const timeout = AbortSignal.timeout(60000);
-        // FormSubmit doesn't return CORS headers for this origin, so the response
-        // itself is unreadable from JS even when delivery succeeds server-side.
-        // no-cors avoids fetch() rejecting on that unreadable (but successful) response.
-        await fetch('https://formsubmit.co/ajax/laurinechanelpro@gmail.com', {
-          method: 'POST',
-          mode: 'no-cors',
-          body: new FormData(form),
-          signal: timeout
-        });
+        if (!sent) throw lastError;
 
         form.reset();
         statusBox.className = 'status ok';
