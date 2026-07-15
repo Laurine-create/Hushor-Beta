@@ -335,11 +335,7 @@
           <p>Le questionnaire prend environ trois minutes.</p>
           <button id="toggleForm" class="btn" type="button" style="margin-top:0;">Donner mon avis</button>
 
-          <form id="feedbackForm" action="https://formsubmit.co/laurinechanelpro@gmail.com" method="POST">
-            <input type="hidden" name="_subject" value="Nouveau retour bêta Hushor">
-            <input type="hidden" name="_template" value="table">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_next" id="nextField" value="">
+          <form id="feedbackForm">
             <input type="hidden" name="Source" value="Page beta.hushor.fr">
 
             <div class="field"><label for="name">Prénom</label><input id="name" name="Prénom" required></div>
@@ -419,22 +415,27 @@
     const toggle = document.getElementById('toggleForm');
     const form = document.getElementById('feedbackForm');
     const statusBox = document.getElementById('status');
-    const nextField = document.getElementById('nextField');
-
-    nextField.value = window.location.origin + window.location.pathname + '?sent=1';
 
     toggle.addEventListener('click', () => {
       form.classList.toggle('open');
       if (form.classList.contains('open')) form.scrollIntoView({behavior:'smooth',block:'start'});
     });
 
-    if (new URLSearchParams(window.location.search).get('sent') === '1') {
-      form.classList.add('open');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const lines = [];
+      for (const [key, value] of new FormData(form).entries()) {
+        lines.push(`${key} : ${value}`);
+      }
+      const subject = encodeURIComponent('Nouveau retour bêta Hushor');
+      const body = encodeURIComponent(lines.join('\n'));
+
       statusBox.className = 'status ok';
-      statusBox.textContent = 'Merci. Ton retour a bien été envoyé à contact@hushor.fr.';
-      history.replaceState(null, '', window.location.pathname);
-      form.scrollIntoView({behavior:'smooth',block:'start'});
-    }
+      statusBox.textContent = 'Ton application mail va s’ouvrir avec ta réponse déjà rédigée : il ne te reste plus qu’à appuyer sur Envoyer.';
+
+      window.location.href = `mailto:contact@hushor.fr?subject=${subject}&body=${body}`;
+    });
   </script>
 </body>
 </html>
