@@ -335,10 +335,11 @@
           <p>Le questionnaire prend environ trois minutes.</p>
           <button id="toggleForm" class="btn" type="button" style="margin-top:0;">Donner mon avis</button>
 
-          <form id="feedbackForm">
+          <form id="feedbackForm" action="https://formsubmit.co/laurinechanelpro@gmail.com" method="POST">
             <input type="hidden" name="_subject" value="Nouveau retour bêta Hushor">
             <input type="hidden" name="_template" value="table">
             <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_next" id="nextField" value="">
             <input type="hidden" name="Source" value="Page beta.hushor.fr">
 
             <div class="field"><label for="name">Prénom</label><input id="name" name="Prénom" required></div>
@@ -418,44 +419,22 @@
     const toggle = document.getElementById('toggleForm');
     const form = document.getElementById('feedbackForm');
     const statusBox = document.getElementById('status');
-    const submitBtn = document.getElementById('submitBtn');
+    const nextField = document.getElementById('nextField');
+
+    nextField.value = window.location.origin + window.location.pathname + '?sent=1';
 
     toggle.addEventListener('click', () => {
       form.classList.toggle('open');
       if (form.classList.contains('open')) form.scrollIntoView({behavior:'smooth',block:'start'});
     });
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Envoi en cours…';
-      statusBox.className = 'status';
-      statusBox.textContent = '';
-
-      try {
-        const response = await fetch('https://formsubmit.co/ajax/laurinechanelpro@gmail.com', {
-          method: 'POST',
-          headers: { 'Accept':'application/json' },
-          body: new FormData(form)
-        });
-        let result = null;
-        try { result = await response.json(); } catch (_) {}
-        if (!response.ok || (result && result.success === false)) {
-          const detail = result && result.message ? result.message : `HTTP ${response.status}`;
-          throw new Error(detail);
-        }
-
-        form.reset();
-        statusBox.className = 'status ok';
-        statusBox.textContent = 'Merci. Ton retour a bien été envoyé à contact@hushor.fr.';
-      } catch (error) {
-        statusBox.className = 'status error';
-        statusBox.textContent = `L’envoi n’a pas abouti (${error.message}). Réessaie ou écris-nous directement à contact@hushor.fr.`;
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Envoyer mon retour';
-      }
-    });
+    if (new URLSearchParams(window.location.search).get('sent') === '1') {
+      form.classList.add('open');
+      statusBox.className = 'status ok';
+      statusBox.textContent = 'Merci. Ton retour a bien été envoyé à contact@hushor.fr.';
+      history.replaceState(null, '', window.location.pathname);
+      form.scrollIntoView({behavior:'smooth',block:'start'});
+    }
   </script>
 </body>
 </html>
