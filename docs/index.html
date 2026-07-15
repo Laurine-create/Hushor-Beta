@@ -433,10 +433,12 @@
       statusBox.textContent = '';
 
       try {
+        const timeout = AbortSignal.timeout(6000);
         const response = await fetch('https://formsubmit.co/ajax/laurinechanelpro@gmail.com', {
           method: 'POST',
           headers: { 'Accept':'application/json' },
-          body: new FormData(form)
+          body: new FormData(form),
+          signal: timeout
         });
         let result = null;
         try { result = await response.json(); } catch (_) {}
