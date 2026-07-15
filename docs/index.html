@@ -465,9 +465,6 @@
         statusBox.className = 'status ok';
         statusBox.textContent = 'Merci. Ton retour a bien été envoyé à contact@hushor.fr.';
       } catch (error) {
-        statusBox.className = 'status error';
-        statusBox.textContent = `L’envoi direct a échoué (${error.message}). Ouverture de ta messagerie pour envoyer quand même ta réponse…`;
-
         const lines = [];
         for (const [key, value] of new FormData(form).entries()) {
           if (key.startsWith('_')) continue;
@@ -475,7 +472,18 @@
         }
         const subject = encodeURIComponent('Nouveau retour bêta Hushor');
         const body = encodeURIComponent(lines.join('\n'));
-        window.location.href = `mailto:contact@hushor.fr?subject=${subject}&body=${body}`;
+        const mailtoLink = `mailto:contact@hushor.fr?subject=${subject}&body=${body}`;
+
+        statusBox.className = 'status error';
+        statusBox.textContent = '';
+        const message = document.createElement('span');
+        message.textContent = `L’envoi direct a échoué (${error.message}). `;
+        const link = document.createElement('a');
+        link.href = mailtoLink;
+        link.textContent = 'Appuie ici pour envoyer ta réponse par email.';
+        link.style.color = 'inherit';
+        link.style.fontWeight = '800';
+        statusBox.append(message, link);
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Envoyer mon retour';
