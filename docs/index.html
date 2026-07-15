@@ -438,15 +438,19 @@
           headers: { 'Accept':'application/json' },
           body: new FormData(form)
         });
-        const result = await response.json();
-        if (!response.ok || result.success === false) throw new Error('submit_failed');
+        let result = null;
+        try { result = await response.json(); } catch (_) {}
+        if (!response.ok || (result && result.success === false)) {
+          const detail = result && result.message ? result.message : `HTTP ${response.status}`;
+          throw new Error(detail);
+        }
 
         form.reset();
         statusBox.className = 'status ok';
         statusBox.textContent = 'Merci. Ton retour a bien été reçu. Il contribuera directement à l’évolution de Hushor.';
       } catch (error) {
         statusBox.className = 'status error';
-        statusBox.textContent = 'L’envoi n’a pas abouti. Vérifie l’activation de contact@hushor.fr puis réessaie.';
+        statusBox.textContent = `L’envoi n’a pas abouti (${error.message}). Réessaie ou écris-nous directement à contact@hushor.fr.`;
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Envoyer mon retour';
