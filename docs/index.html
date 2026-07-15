@@ -434,18 +434,15 @@
 
       try {
         const timeout = AbortSignal.timeout(6000);
-        const response = await fetch('https://formsubmit.co/ajax/laurinechanelpro@gmail.com', {
+        // FormSubmit doesn't return CORS headers for this origin, so the response
+        // itself is unreadable from JS even when delivery succeeds server-side.
+        // no-cors avoids fetch() rejecting on that unreadable (but successful) response.
+        await fetch('https://formsubmit.co/ajax/laurinechanelpro@gmail.com', {
           method: 'POST',
-          headers: { 'Accept':'application/json' },
+          mode: 'no-cors',
           body: new FormData(form),
           signal: timeout
         });
-        let result = null;
-        try { result = await response.json(); } catch (_) {}
-        if (!response.ok || (result && result.success === false)) {
-          const detail = result && result.message ? result.message : `HTTP ${response.status}`;
-          throw new Error(detail);
-        }
 
         form.reset();
         statusBox.className = 'status ok';
