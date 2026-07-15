@@ -450,7 +450,16 @@
         statusBox.textContent = 'Merci. Ton retour a bien été envoyé à contact@hushor.fr.';
       } catch (error) {
         statusBox.className = 'status error';
-        statusBox.textContent = `L’envoi n’a pas abouti (${error.message}). Réessaie ou écris-nous directement à contact@hushor.fr.`;
+        statusBox.textContent = `L’envoi direct a échoué (${error.message}). Ouverture de ta messagerie pour envoyer quand même ta réponse…`;
+
+        const lines = [];
+        for (const [key, value] of new FormData(form).entries()) {
+          if (key.startsWith('_')) continue;
+          lines.push(`${key} : ${value}`);
+        }
+        const subject = encodeURIComponent('Nouveau retour bêta Hushor');
+        const body = encodeURIComponent(lines.join('\n'));
+        window.location.href = `mailto:contact@hushor.fr?subject=${subject}&body=${body}`;
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Envoyer mon retour';
